@@ -4,8 +4,7 @@
 package com.mycompany.proyectounidad2;
 
 import com.mycompany.proyectounidad2.dominio.Estudiante;
-import com.mycompany.proyectounidad2.dominio.Reaccion;
-import com.mycompany.proyectounidad2.dominio.TipoReaccion;
+import com.mycompany.proyectounidad2.dominio.Match;
 import com.mycompany.proyectounidad2.utils.JpaUtil;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
@@ -23,50 +22,44 @@ public class ProyectoUnidad2 {
         try {
             em = JpaUtil.getEntityManager();
 
-            Estudiante emisor = new Estudiante(
-                    "Christian",
-                    "Martinez",
+            Estudiante estudiante1 = new Estudiante(
+                    "Luis",
+                    "Perez",
                     "Lopez",
-                    "christian4@potros.itson.edu.mx",
+                    "luis@potros.itson.edu.mx",
                     "123456",
                     "Ingenieria en Software",
-                    "fotos/christian4.jpg",
+                    "fotos/luis.jpg",
                     "Le gusta programar"
             );
 
-            Estudiante receptor = new Estudiante(
+            Estudiante estudiante2 = new Estudiante(
                     "Ana",
                     "Garcia",
                     "Torres",
-                    "ana@potros.itson.edu.mx",
+                    "ana2@potros.itson.edu.mx",
                     "abcdef",
                     "Ingenieria en Software",
-                    "fotos/ana.jpg",
+                    "fotos/ana2.jpg",
                     "Le gusta el ajedrez"
-            );
-
-            Reaccion reaccion = new Reaccion(
-                    TipoReaccion.LIKE,
-                    LocalDate.now(),
-                    emisor,
-                    receptor
             );
 
             em.getTransaction().begin();
 
-            em.persist(emisor);
-            em.persist(receptor);
-            em.persist(reaccion);
+            em.persist(estudiante1);
+            em.persist(estudiante2);
+
+            Match match = new Match(LocalDate.now(), estudiante1, estudiante2);
+            em.persist(match);
 
             em.getTransaction().commit();
 
-            System.out.println("Reacción guardada correctamente con id: " + reaccion.getId());
+            System.out.println("Match guardado correctamente con id: " + match.getId());
 
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.out.println("Error al guardar reacción: " + e.getMessage());
             e.printStackTrace();
         } finally {
             if (em != null && em.isOpen()) {
