@@ -4,23 +4,57 @@
  */
 package com.mycompany.proyectounidad2.dominio;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  *
  * @author Afgord
  */
 @Entity
+@Table(name = "reaccion")
 public class Reaccion implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_reaccion")
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo", nullable = false)
+    private TipoReaccion reaccion;
+
+    @Column(name = "fecha", nullable = false)
+    private LocalDate fecha;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_emisor", nullable = false)
+    private Estudiante emisor;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_receptor", nullable = false)
+    private Estudiante receptor;
+
+    public Reaccion() {
+    }
+
+    public Reaccion(TipoReaccion reaccion, LocalDate fecha, Estudiante emisor, Estudiante receptor) {
+        this.reaccion = reaccion;
+        this.fecha = fecha;
+        this.emisor = emisor;
+        this.receptor = receptor;
+    }
 
     public Long getId() {
         return id;
@@ -28,6 +62,38 @@ public class Reaccion implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public TipoReaccion getReaccion() {
+        return reaccion;
+    }
+
+    public void setReaccion(TipoReaccion reaccion) {
+        this.reaccion = reaccion;
+    }
+
+    public LocalDate getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+
+    public Estudiante getEmisor() {
+        return emisor;
+    }
+
+    public void setEmisor(Estudiante emisor) {
+        this.emisor = emisor;
+    }
+
+    public Estudiante getReceptor() {
+        return receptor;
+    }
+
+    public void setReceptor(Estudiante receptor) {
+        this.receptor = receptor;
     }
 
     @Override
@@ -52,7 +118,7 @@ public class Reaccion implements Serializable {
 
     @Override
     public String toString() {
-        return "com.mycompany.proyectounidad2.dominio.Reaccion[ id=" + id + " ]";
+        return "Reaccion{" + "id=" + id + ", reaccion=" + reaccion + ", fecha=" + fecha + '}';
     }
 
 }
