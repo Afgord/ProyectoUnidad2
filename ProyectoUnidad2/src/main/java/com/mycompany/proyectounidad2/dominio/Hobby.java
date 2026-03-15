@@ -29,7 +29,7 @@ public class Hobby implements Serializable {
     @Column(name = "id_hobby")
     private Long id;
 
-    @Column(name = "nombre", nullable = false)
+    @Column(name = "nombre", nullable = false, unique = true)
     private String nombre;
 
     @Column(name = "descripcion", length = 500)

@@ -7,6 +7,7 @@ package com.mycompany.proyectounidad2.persistencia;
 import com.mycompany.proyectounidad2.dominio.Estudiante;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import java.util.List;
 
 /**
  *
@@ -63,6 +64,42 @@ public class EstudianteDAO implements IEstudianteDAO {
         query.setParameter("id", id);
 
         return query.getResultStream().findFirst().orElse(null);
+    }
+
+    @Override
+    public List<Estudiante> buscarConHobbiesEnComun(Long idEstudiante) {
+        String jpql = """
+        SELECT DISTINCT e2
+        FROM Estudiante e1
+        JOIN e1.hobbies h
+        JOIN h.estudiantes e2
+        WHERE e1.id = :idEstudiante
+          AND e2.id <> :idEstudiante
+        """;
+
+        TypedQuery<Estudiante> query = em.createQuery(jpql, Estudiante.class);
+        query.setParameter("idEstudiante", idEstudiante);
+
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Estudiante> explorarPerfiles(Long idEstudiante) {
+        String jpql = """
+        SELECT e
+        FROM Estudiante e
+        WHERE e.id <> :idEstudiante
+          AND e.id NOT IN (
+              SELECT r.receptor.id
+              FROM Reaccion r
+              WHERE r.emisor.id = :idEstudiante
+          )
+        """;
+
+        TypedQuery<Estudiante> query = em.createQuery(jpql, Estudiante.class);
+        query.setParameter("idEstudiante", idEstudiante);
+
+        return query.getResultList();
     }
 
 }

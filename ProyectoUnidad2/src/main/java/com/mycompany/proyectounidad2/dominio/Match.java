@@ -33,7 +33,7 @@ public class Match implements Serializable {
     @Column(name = "id_match")
     private Long id;
 
-    @Column(name = "fecha_match")
+    @Column(name = "fecha_match", nullable = false)
     private LocalDate fechaMatch;
 
     @ManyToOne(optional = false)

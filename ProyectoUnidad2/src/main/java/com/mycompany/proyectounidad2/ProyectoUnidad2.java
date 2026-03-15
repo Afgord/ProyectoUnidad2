@@ -40,7 +40,7 @@ public class ProyectoUnidad2 {
                     "Perez",
                     "Lopez",
                     "luis@potros.itson.edu.mx",
-                    "123456",
+                    "H3lL0o",
                     "Ingenieria en Software",
                     "fotos/luis.jpg",
                     "Le gusta programar"
@@ -51,18 +51,31 @@ public class ProyectoUnidad2 {
                     "Garcia",
                     "Torres",
                     "ana3@potros.itson.edu.mx",
-                    "abcdef",
+                    "1j23juH",
                     "Ingenieria en Software",
                     "fotos/ana3.jpg",
                     "Le gusta el ajedrez"
             );
 
+            Estudiante estudiante3 = new Estudiante(
+                    "Carlos",
+                    "Mendoza",
+                    "Ruiz",
+                    "carlos@potros.itson.edu.mx",
+                    "Qi3T8n",
+                    "Ingenieria en Software",
+                    "fotos/carlos.jpg",
+                    "Le gusta el anime y los videojuegos"
+            );
+
             estudiante1 = estudianteService.registrarEstudiante(estudiante1);
             estudiante2 = estudianteService.registrarEstudiante(estudiante2);
+            estudiante3 = estudianteService.registrarEstudiante(estudiante3);
 
             System.out.println("Estudiantes registrados correctamente.");
             System.out.println("ID estudiante1: " + estudiante1.getId());
             System.out.println("ID estudiante2: " + estudiante2.getId());
+            System.out.println("ID estudiante3: " + estudiante3.getId());
 
             // =========================================================
             // PRUEBA 2: BUSCAR ESTUDIANTE POR CORREO
@@ -93,7 +106,7 @@ public class ProyectoUnidad2 {
                         "Perez2",
                         "Lopez2",
                         "luis@potros.itson.edu.mx",
-                        "999999",
+                        "H3lL0o",
                         "Ingenieria en Software",
                         "fotos/luis2.jpg",
                         "Correo repetido"
@@ -113,7 +126,7 @@ public class ProyectoUnidad2 {
 
             Estudiante loginCorrecto = estudianteService.iniciarSesion(
                     "luis@potros.itson.edu.mx",
-                    "123456"
+                    "H3lL0o"
             );
             System.out.println("Inicio de sesión correcto para: " + loginCorrecto.getNombre());
 
@@ -214,6 +227,7 @@ public class ProyectoUnidad2 {
             estudianteService.agregarHobby(estudiante1.getId(), hobby1.getId());
             estudianteService.agregarHobby(estudiante1.getId(), hobby3.getId());
             estudianteService.agregarHobby(estudiante2.getId(), hobby2.getId());
+            estudianteService.agregarHobby(estudiante2.getId(), hobby3.getId());
 
             System.out.println("Hobbies asignados correctamente.");
 
@@ -294,6 +308,28 @@ public class ProyectoUnidad2 {
 
             for (Hobby h : estudianteConHobbies.getHobbies()) {
                 System.out.println("- " + h.getNombre());
+            }
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 18: BUSCAR ESTUDIANTES CON HOBBIES EN COMUN");
+            System.out.println("=================================================");
+
+            List<Estudiante> compatibles = estudianteService.buscarConHobbiesEnComun(estudiante1.getId());
+
+            System.out.println("Estudiantes compatibles con " + estudiante1.getNombre() + ":");
+            for (Estudiante e : compatibles) {
+                System.out.println("- " + e.getNombre() + " " + e.getApPat());
+            }
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 19: EXPLORAR PERFILES");
+            System.out.println("=================================================");
+
+            List<Estudiante> perfiles = estudianteService.explorarPerfiles(estudiante1.getId());
+
+            System.out.println("Perfiles disponibles para " + estudiante1.getNombre() + ":");
+            for (Estudiante e : perfiles) {
+                System.out.println("- " + e.getNombre() + " " + e.getApPat());
             }
 
             System.out.println("\n=================================================");

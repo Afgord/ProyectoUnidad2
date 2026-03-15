@@ -8,6 +8,7 @@ import com.mycompany.proyectounidad2.dominio.Estudiante;
 import com.mycompany.proyectounidad2.dominio.Match;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import java.util.List;
 
 /**
  *
@@ -41,6 +42,21 @@ public class MatchDAO implements IMatchDAO {
         query.setParameter("estudiante2", estudiante2);
 
         return query.getResultStream().findFirst().orElse(null);
+    }
+
+    @Override
+    public List<Match> buscarMatchesDeEstudiante(Long idEstudiante) {
+        String jpql = """
+        SELECT m
+        FROM Match m
+        WHERE m.estudiante1.id = :id
+           OR m.estudiante2.id = :id
+    """;
+
+        TypedQuery<Match> query = em.createQuery(jpql, Match.class);
+        query.setParameter("id", idEstudiante);
+
+        return query.getResultList();
     }
 
 }

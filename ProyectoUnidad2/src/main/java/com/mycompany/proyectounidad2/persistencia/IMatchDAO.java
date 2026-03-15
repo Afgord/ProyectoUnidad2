@@ -6,6 +6,7 @@ package com.mycompany.proyectounidad2.persistencia;
 
 import com.mycompany.proyectounidad2.dominio.Estudiante;
 import com.mycompany.proyectounidad2.dominio.Match;
+import java.util.List;
 
 /**
  *
@@ -16,5 +17,7 @@ public interface IMatchDAO {
     Match guardar(Match match);
 
     Match buscarMatchEntre(Estudiante estudiante1, Estudiante estudiante2);
+
+    List<Match> buscarMatchesDeEstudiante(Long idEstudiante);
 
 }

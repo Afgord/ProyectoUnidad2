@@ -13,6 +13,7 @@ import com.mycompany.proyectounidad2.persistencia.IHobbyDAO;
 import com.mycompany.proyectounidad2.utils.JpaUtil;
 import com.mycompany.proyectounidad2.utils.PasswordUtil;
 import jakarta.persistence.EntityManager;
+import java.util.List;
 
 /**
  *
@@ -22,6 +23,18 @@ public class EstudianteService implements IEstudianteService {
 
     @Override
     public Estudiante registrarEstudiante(Estudiante estudiante) {
+
+        if (estudiante == null) {
+            throw new IllegalArgumentException("El estudiante no puede ser nulo.");
+        }
+
+        String correo = estudiante.getCorreoInst();
+
+        if (correo != null) {
+            correo = correo.trim().toLowerCase();
+            estudiante.setCorreoInst(correo);
+        }
+
         validarDatosEstudiante(estudiante);
 
         EntityManager em = JpaUtil.getEntityManager();
@@ -66,6 +79,8 @@ public class EstudianteService implements IEstudianteService {
             throw new IllegalArgumentException("El correo institucional no puede ser nulo o vacío.");
         }
 
+        correoInst = correoInst.trim().toLowerCase();
+
         EntityManager em = JpaUtil.getEntityManager();
 
         try {
@@ -97,8 +112,18 @@ public class EstudianteService implements IEstudianteService {
             throw new IllegalArgumentException("El correo institucional no puede ser nulo o vacío.");
         }
 
+        if (!esCorreoInstitucionalValido(estudiante.getCorreoInst())) {
+            throw new IllegalArgumentException("El correo institucional no tiene un formato válido.");
+        }
+
         if (estudiante.getPassword() == null || estudiante.getPassword().isBlank()) {
             throw new IllegalArgumentException("La contraseña no puede ser nula o vacía.");
+        }
+
+        if (!esPasswordRobusto(estudiante.getPassword())) {
+            throw new IllegalArgumentException(
+                    "La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número."
+            );
         }
 
         if (estudiante.getCarrera() == null || estudiante.getCarrera().isBlank()) {
@@ -111,6 +136,8 @@ public class EstudianteService implements IEstudianteService {
         if (correoInst == null || correoInst.isBlank()) {
             throw new IllegalArgumentException("El correo institucional no puede ser nulo o vacío.");
         }
+
+        correoInst = correoInst.trim().toLowerCase();
 
         if (password == null || password.isBlank()) {
             throw new IllegalArgumentException("La contraseña no puede ser nula o vacía.");
@@ -166,6 +193,10 @@ public class EstudianteService implements IEstudianteService {
             Hobby hobby = hobbyDAO.buscarPorId(idHobby);
             if (hobby == null) {
                 throw new IllegalArgumentException("No existe un hobby con ese id.");
+            }
+
+            if (estudiante.getHobbies().contains(hobby)) {
+                throw new IllegalArgumentException("El estudiante ya tiene asignado ese hobby.");
             }
 
             estudiante.getHobbies().add(hobby);
@@ -229,6 +260,62 @@ public class EstudianteService implements IEstudianteService {
         } finally {
             em.close();
         }
+    }
+
+    @Override
+    public List<Estudiante> buscarConHobbiesEnComun(Long idEstudiante) {
+        if (idEstudiante == null) {
+            throw new IllegalArgumentException("El id del estudiante no puede ser nulo.");
+        }
+
+        EntityManager em = JpaUtil.getEntityManager();
+
+        try {
+            IEstudianteDAO estudianteDAO = new EstudianteDAO(em);
+
+            Estudiante estudiante = estudianteDAO.buscarPorId(idEstudiante);
+            if (estudiante == null) {
+                throw new IllegalArgumentException("No existe un estudiante con ese id.");
+            }
+
+            return estudianteDAO.buscarConHobbiesEnComun(idEstudiante);
+
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Estudiante> explorarPerfiles(Long idEstudiante) {
+        if (idEstudiante == null) {
+            throw new IllegalArgumentException("El id del estudiante no puede ser nulo.");
+        }
+
+        EntityManager em = JpaUtil.getEntityManager();
+
+        try {
+            IEstudianteDAO estudianteDAO = new EstudianteDAO(em);
+
+            Estudiante estudiante = estudianteDAO.buscarPorId(idEstudiante);
+            if (estudiante == null) {
+                throw new IllegalArgumentException("No existe un estudiante con ese id.");
+            }
+
+            return estudianteDAO.explorarPerfiles(idEstudiante);
+
+        } finally {
+            em.close();
+        }
+    }
+
+    private boolean esCorreoInstitucionalValido(String correo) {
+        return correo != null
+                && correo.matches("^[A-Za-z0-9._%+-]+@potros\\.itson\\.edu\\.mx$");
+    }
+
+    private boolean esPasswordRobusto(String password) {
+        return password != null
+                && password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{6,}$");
     }
 
 }

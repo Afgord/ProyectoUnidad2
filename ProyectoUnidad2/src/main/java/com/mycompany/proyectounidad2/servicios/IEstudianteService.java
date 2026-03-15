@@ -5,6 +5,7 @@
 package com.mycompany.proyectounidad2.servicios;
 
 import com.mycompany.proyectounidad2.dominio.Estudiante;
+import java.util.List;
 
 /**
  *
@@ -23,5 +24,9 @@ public interface IEstudianteService {
     Estudiante buscarPorId(Long id);
 
     Estudiante buscarPorIdConHobbies(Long id);
+
+    List<Estudiante> buscarConHobbiesEnComun(Long idEstudiante);
+
+    List<Estudiante> explorarPerfiles(Long idEstudiante);
 
 }

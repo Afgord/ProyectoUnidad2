@@ -19,6 +19,15 @@ public class HobbyService implements IHobbyService {
 
     @Override
     public Hobby registrarHobby(Hobby hobby) {
+
+        if (hobby == null) {
+            throw new IllegalArgumentException("El hobby no puede ser nulo.");
+        }
+
+        if (hobby.getNombre() != null) {
+            hobby.setNombre(hobby.getNombre().trim().toLowerCase());
+        }
+
         validarDatosHobby(hobby);
 
         EntityManager em = JpaUtil.getEntityManager();
@@ -59,6 +68,8 @@ public class HobbyService implements IHobbyService {
         if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException("El nombre del hobby no puede ser nulo o vacío.");
         }
+
+        nombre = nombre.trim().toLowerCase();
 
         EntityManager em = JpaUtil.getEntityManager();
 
