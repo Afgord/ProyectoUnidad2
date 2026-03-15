@@ -4,11 +4,16 @@
 package com.mycompany.proyectounidad2;
 
 import com.mycompany.proyectounidad2.dominio.Estudiante;
+import com.mycompany.proyectounidad2.dominio.Hobby;
 import com.mycompany.proyectounidad2.dominio.TipoReaccion;
+import com.mycompany.proyectounidad2.servicios.EstudianteService;
+import com.mycompany.proyectounidad2.servicios.HobbyService;
+import com.mycompany.proyectounidad2.servicios.IEstudianteService;
+import com.mycompany.proyectounidad2.servicios.IHobbyService;
 import com.mycompany.proyectounidad2.servicios.IReaccionService;
 import com.mycompany.proyectounidad2.servicios.ReaccionService;
 import com.mycompany.proyectounidad2.utils.JpaUtil;
-import jakarta.persistence.EntityManager;
+import java.util.List;
 
 /**
  *
@@ -18,10 +23,17 @@ public class ProyectoUnidad2 {
 
     public static void main(String[] args) {
 
-        EntityManager em = null;
-
         try {
-            em = JpaUtil.getEntityManager();
+            IEstudianteService estudianteService = new EstudianteService();
+            IHobbyService hobbyService = new HobbyService();
+            IReaccionService reaccionService = new ReaccionService();
+
+            // =========================================================
+            // PRUEBA 1: REGISTRO DE ESTUDIANTES
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 1: REGISTRO DE ESTUDIANTES");
+            System.out.println("=================================================");
 
             Estudiante estudiante1 = new Estudiante(
                     "Luis",
@@ -45,58 +57,252 @@ public class ProyectoUnidad2 {
                     "Le gusta el ajedrez"
             );
 
-            em.getTransaction().begin();
-            em.persist(estudiante1);
-            em.persist(estudiante2);
-            em.getTransaction().commit();
+            estudiante1 = estudianteService.registrarEstudiante(estudiante1);
+            estudiante2 = estudianteService.registrarEstudiante(estudiante2);
 
-            System.out.println("Estudiantes guardados correctamente.");
+            System.out.println("Estudiantes registrados correctamente.");
             System.out.println("ID estudiante1: " + estudiante1.getId());
             System.out.println("ID estudiante2: " + estudiante2.getId());
 
-            IReaccionService reaccionService = new ReaccionService();
+            // =========================================================
+            // PRUEBA 2: BUSCAR ESTUDIANTE POR CORREO
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 2: BUSCAR ESTUDIANTE POR CORREO");
+            System.out.println("=================================================");
 
-            System.out.println("\n--- PRUEBA 1: LIKE de Luis hacia Ana ---");
+            Estudiante encontrado = estudianteService.buscarPorCorreo("luis@potros.itson.edu.mx");
+            if (encontrado != null) {
+                System.out.println("Estudiante encontrado: "
+                        + encontrado.getNombre() + " "
+                        + encontrado.getApPat());
+            } else {
+                System.out.println("No se encontró estudiante.");
+            }
+
+            // =========================================================
+            // PRUEBA 3: VALIDAR CORREO DUPLICADO
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 3: VALIDAR CORREO DUPLICADO");
+            System.out.println("=================================================");
+
+            try {
+                Estudiante duplicado = new Estudiante(
+                        "Luis2",
+                        "Perez2",
+                        "Lopez2",
+                        "luis@potros.itson.edu.mx",
+                        "999999",
+                        "Ingenieria en Software",
+                        "fotos/luis2.jpg",
+                        "Correo repetido"
+                );
+
+                estudianteService.registrarEstudiante(duplicado);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Validación correcta: " + e.getMessage());
+            }
+
+            // =========================================================
+            // PRUEBA 4: LOGIN CORRECTO
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 4: LOGIN CORRECTO");
+            System.out.println("=================================================");
+
+            Estudiante loginCorrecto = estudianteService.iniciarSesion(
+                    "luis@potros.itson.edu.mx",
+                    "123456"
+            );
+            System.out.println("Inicio de sesión correcto para: " + loginCorrecto.getNombre());
+
+            // =========================================================
+            // PRUEBA 5: LOGIN CON CONTRASEÑA INCORRECTA
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 5: LOGIN CON CONTRASEÑA INCORRECTA");
+            System.out.println("=================================================");
+
+            try {
+                estudianteService.iniciarSesion("luis@potros.itson.edu.mx", "000000");
+            } catch (IllegalArgumentException e) {
+                System.out.println("Validación correcta: " + e.getMessage());
+            }
+
+            // =========================================================
+            // PRUEBA 6: LOGIN CON CORREO INEXISTENTE
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 6: LOGIN CON CORREO INEXISTENTE");
+            System.out.println("=================================================");
+
+            try {
+                estudianteService.iniciarSesion("noexiste@potros.itson.edu.mx", "123456");
+            } catch (IllegalArgumentException e) {
+                System.out.println("Validación correcta: " + e.getMessage());
+            }
+
+            // =========================================================
+            // PRUEBA 7: REGISTRO DE HOBBIES
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 7: REGISTRO DE HOBBIES");
+            System.out.println("=================================================");
+
+            Hobby hobby1 = hobbyService.registrarHobby(
+                    new Hobby("Programación", "Desarrollo de software")
+            );
+            Hobby hobby2 = hobbyService.registrarHobby(
+                    new Hobby("Ajedrez", "Juego de estrategia")
+            );
+            Hobby hobby3 = hobbyService.registrarHobby(
+                    new Hobby("Videojuegos", "Entretenimiento digital")
+            );
+
+            System.out.println("Hobbies registrados correctamente.");
+            System.out.println("ID hobby1: " + hobby1.getId());
+            System.out.println("ID hobby2: " + hobby2.getId());
+            System.out.println("ID hobby3: " + hobby3.getId());
+
+            // =========================================================
+            // PRUEBA 8: BUSCAR HOBBY POR NOMBRE
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 8: BUSCAR HOBBY POR NOMBRE");
+            System.out.println("=================================================");
+
+            Hobby hobbyEncontrado = hobbyService.buscarPorNombre("Ajedrez");
+            if (hobbyEncontrado != null) {
+                System.out.println("Hobby encontrado: " + hobbyEncontrado.getNombre());
+            } else {
+                System.out.println("No se encontró hobby.");
+            }
+
+            // =========================================================
+            // PRUEBA 9: LISTAR HOBBIES
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 9: LISTAR HOBBIES");
+            System.out.println("=================================================");
+
+            List<Hobby> hobbies = hobbyService.obtenerTodos();
+            for (Hobby h : hobbies) {
+                System.out.println(h.getId() + " - " + h.getNombre());
+            }
+
+            // =========================================================
+            // PRUEBA 10: VALIDAR HOBBY DUPLICADO
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 10: VALIDAR HOBBY DUPLICADO");
+            System.out.println("=================================================");
+
+            try {
+                hobbyService.registrarHobby(new Hobby("Ajedrez", "Duplicado"));
+            } catch (IllegalArgumentException e) {
+                System.out.println("Validación correcta: " + e.getMessage());
+            }
+
+            // =========================================================
+            // PRUEBA 11: ASIGNAR HOBBIES A ESTUDIANTES
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 11: ASIGNAR HOBBIES A ESTUDIANTES");
+            System.out.println("=================================================");
+
+            estudianteService.agregarHobby(estudiante1.getId(), hobby1.getId());
+            estudianteService.agregarHobby(estudiante1.getId(), hobby3.getId());
+            estudianteService.agregarHobby(estudiante2.getId(), hobby2.getId());
+
+            System.out.println("Hobbies asignados correctamente.");
+
+            // =========================================================
+            // PRUEBA 12: VALIDAR ESTUDIANTE INEXISTENTE AL ASIGNAR HOBBY
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 12: VALIDAR ESTUDIANTE INEXISTENTE AL ASIGNAR HOBBY");
+            System.out.println("=================================================");
+
+            try {
+                estudianteService.agregarHobby(999L, hobby1.getId());
+            } catch (IllegalArgumentException e) {
+                System.out.println("Validación correcta: " + e.getMessage());
+            }
+
+            // =========================================================
+            // PRUEBA 13: VALIDAR HOBBY INEXISTENTE AL ASIGNAR
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 13: VALIDAR HOBBY INEXISTENTE AL ASIGNAR");
+            System.out.println("=================================================");
+
+            try {
+                estudianteService.agregarHobby(estudiante1.getId(), 999L);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Validación correcta: " + e.getMessage());
+            }
+
+            // =========================================================
+            // PRUEBA 14: REGISTRAR REACCIONES Y GENERAR MATCH
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 14: REGISTRAR REACCIONES Y GENERAR MATCH");
+            System.out.println("=================================================");
+
             reaccionService.registrarReaccion(estudiante1, estudiante2, TipoReaccion.LIKE);
             System.out.println("Reacción 1 registrada correctamente.");
 
-            System.out.println("\n--- PRUEBA 2: LIKE de Ana hacia Luis ---");
             reaccionService.registrarReaccion(estudiante2, estudiante1, TipoReaccion.LIKE);
             System.out.println("Reacción 2 registrada correctamente.");
             System.out.println("Si todo salió bien, debió generarse un MATCH.");
 
-            System.out.println("\n--- PRUEBA 3: actualizar reacción existente ---");
+            // =========================================================
+            // PRUEBA 15: ACTUALIZAR REACCIÓN EXISTENTE
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 15: ACTUALIZAR REACCIÓN EXISTENTE");
+            System.out.println("=================================================");
+
             reaccionService.registrarReaccion(estudiante1, estudiante2, TipoReaccion.NO_INTERESA);
-            System.out.println("La reacción de Luis hacia Ana se actualizó a NO_INTERESA.");
+            System.out.println("Reacción actualizada correctamente a NO_INTERESA.");
 
-            System.out.println("\n--- PRUEBA 4: volver a actualizar reacción existente ---");
             reaccionService.registrarReaccion(estudiante1, estudiante2, TipoReaccion.LIKE);
-            System.out.println("La reacción de Luis hacia Ana se actualizó nuevamente a LIKE.");
+            System.out.println("Reacción actualizada nuevamente a LIKE.");
 
-            System.out.println("\n--- PRUEBA 5: validar auto-reacción ---");
+            // =========================================================
+            // PRUEBA 16: VALIDAR AUTO-REACCIÓN
+            // =========================================================
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 16: VALIDAR AUTO-REACCIÓN");
+            System.out.println("=================================================");
+
             try {
                 reaccionService.registrarReaccion(estudiante1, estudiante1, TipoReaccion.LIKE);
             } catch (IllegalArgumentException e) {
                 System.out.println("Validación correcta: " + e.getMessage());
             }
 
-            System.out.println("\n--- PRUEBA EXTRA: intentar duplicar reaccion ---");
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 17: VER HOBBIES DE ESTUDIANTE");
+            System.out.println("=================================================");
 
-            try {
-                reaccionService.registrarReaccion(estudiante1, estudiante2, TipoReaccion.LIKE);
-                reaccionService.registrarReaccion(estudiante1, estudiante2, TipoReaccion.LIKE);
-            } catch (Exception e) {
-                System.out.println("Restricción protegió duplicado: " + e.getMessage());
+            Estudiante estudianteConHobbies
+                    = estudianteService.buscarPorIdConHobbies(estudiante1.getId());
+
+            System.out.println("Hobbies de " + estudianteConHobbies.getNombre() + ":");
+
+            for (Hobby h : estudianteConHobbies.getHobbies()) {
+                System.out.println("- " + h.getNombre());
             }
 
-            System.out.println("\nTodas las pruebas del servicio terminaron.");
+            System.out.println("\n=================================================");
+            System.out.println("TODAS LAS PRUEBAS FINALIZARON");
+            System.out.println("=================================================");
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
             JpaUtil.close();
         }
 
