@@ -6,7 +6,6 @@ package com.mycompany.proyectounidad2.persistencia;
 
 import com.mycompany.proyectounidad2.dominio.Estudiante;
 import com.mycompany.proyectounidad2.dominio.Reaccion;
-import com.mycompany.proyectounidad2.dominio.TipoReaccion;
 
 /**
  *
@@ -16,6 +15,8 @@ public interface IReaccionDAO {
 
     Reaccion guardar(Reaccion reaccion);
 
-    Reaccion buscarReaccion(Estudiante emisor, Estudiante receptor, TipoReaccion tipo);
+    Reaccion actualizar(Reaccion reaccion);
+
+    Reaccion buscarPorEmisorReceptor(Estudiante emisor, Estudiante receptor);
 
 }

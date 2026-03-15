@@ -6,8 +6,6 @@ package com.mycompany.proyectounidad2.persistencia;
 
 import com.mycompany.proyectounidad2.dominio.Estudiante;
 import com.mycompany.proyectounidad2.dominio.Reaccion;
-import com.mycompany.proyectounidad2.dominio.TipoReaccion;
-import com.mycompany.proyectounidad2.utils.JpaUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
@@ -17,47 +15,37 @@ import jakarta.persistence.TypedQuery;
  */
 public class ReaccionDAO implements IReaccionDAO {
 
-    @Override
-    public Reaccion guardar(Reaccion reaccion) {
-        EntityManager em = JpaUtil.getEntityManager();
+    private final EntityManager em;
 
-        try {
-            em.getTransaction().begin();
-            em.persist(reaccion);
-            em.getTransaction().commit();
-            return reaccion;
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+    public ReaccionDAO(EntityManager em) {
+        this.em = em;
     }
 
     @Override
-    public Reaccion buscarReaccion(Estudiante emisor, Estudiante receptor, TipoReaccion tipo) {
-        EntityManager em = JpaUtil.getEntityManager();
+    public Reaccion guardar(Reaccion reaccion) {
+        em.persist(reaccion);
+        return reaccion;
+    }
 
-        try {
-            String jpql = """
-                    SELECT r
-                    FROM Reaccion r
-                    WHERE r.emisor = :emisor
-                      AND r.receptor = :receptor
-                      AND r.tipo = :tipo
-                    """;
+    @Override
+    public Reaccion actualizar(Reaccion reaccion) {
+        return em.merge(reaccion);
+    }
 
-            TypedQuery<Reaccion> query = em.createQuery(jpql, Reaccion.class);
-            query.setParameter("emisor", emisor);
-            query.setParameter("receptor", receptor);
-            query.setParameter("tipo", tipo);
+    @Override
+    public Reaccion buscarPorEmisorReceptor(Estudiante emisor, Estudiante receptor) {
+        String jpql = """
+                SELECT r
+                FROM Reaccion r
+                WHERE r.emisor = :emisor
+                  AND r.receptor = :receptor
+                """;
 
-            return query.getResultStream().findFirst().orElse(null);
-        } finally {
-            em.close();
-        }
+        TypedQuery<Reaccion> query = em.createQuery(jpql, Reaccion.class);
+        query.setParameter("emisor", emisor);
+        query.setParameter("receptor", receptor);
+
+        return query.getResultStream().findFirst().orElse(null);
     }
 
 }

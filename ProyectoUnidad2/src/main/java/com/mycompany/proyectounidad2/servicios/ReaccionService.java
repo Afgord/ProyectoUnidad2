@@ -12,6 +12,8 @@ import com.mycompany.proyectounidad2.persistencia.IMatchDAO;
 import com.mycompany.proyectounidad2.persistencia.IReaccionDAO;
 import com.mycompany.proyectounidad2.persistencia.MatchDAO;
 import com.mycompany.proyectounidad2.persistencia.ReaccionDAO;
+import com.mycompany.proyectounidad2.utils.JpaUtil;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 
 /**
@@ -20,31 +22,83 @@ import java.time.LocalDate;
  */
 public class ReaccionService implements IReaccionService {
 
-    private final IReaccionDAO reaccionDAO;
-    private final IMatchDAO matchDAO;
-
-    public ReaccionService() {
-        this.reaccionDAO = new ReaccionDAO();
-        this.matchDAO = new MatchDAO();
-    }
-
     @Override
     public Reaccion registrarReaccion(Estudiante emisor, Estudiante receptor, TipoReaccion tipo) {
-        if (emisor == null || receptor == null) {
-            throw new IllegalArgumentException("Emisor y receptor no pueden ser nulos.");
+        validarDatos(emisor, receptor, tipo);
+
+        EntityManager em = JpaUtil.getEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            IReaccionDAO reaccionDAO = new ReaccionDAO(em);
+            IMatchDAO matchDAO = new MatchDAO(em);
+
+            Reaccion reaccion = crearOActualizarReaccion(reaccionDAO, emisor, receptor, tipo);
+
+            if (reaccion.getTipo() == TipoReaccion.LIKE) {
+                verificarYCrearMatchSiAplica(reaccionDAO, matchDAO, emisor, receptor);
+            }
+
+            em.getTransaction().commit();
+            return reaccion;
+
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error al registrar la reacción.", e);
+        } finally {
+            em.close();
+        }
+    }
+
+    private void validarDatos(Estudiante emisor, Estudiante receptor, TipoReaccion tipo) {
+        if (emisor == null) {
+            throw new IllegalArgumentException("El emisor no puede ser nulo.");
+        }
+
+        if (receptor == null) {
+            throw new IllegalArgumentException("El receptor no puede ser nulo.");
+        }
+
+        if (tipo == null) {
+            throw new IllegalArgumentException("El tipo de reacción no puede ser nulo.");
+        }
+
+        if (emisor.getId() == null || receptor.getId() == null) {
+            throw new IllegalArgumentException("Ambos estudiantes deben tener un ID válido.");
         }
 
         if (emisor.getId().equals(receptor.getId())) {
             throw new IllegalArgumentException("Un estudiante no puede reaccionar a sí mismo.");
         }
+    }
 
-        Reaccion reaccion = new Reaccion(tipo, LocalDate.now(), emisor, receptor);
-        reaccionDAO.guardar(reaccion);
+    private Reaccion crearOActualizarReaccion(IReaccionDAO reaccionDAO,
+            Estudiante emisor, Estudiante receptor, TipoReaccion tipo) {
 
-        if (tipo == TipoReaccion.LIKE) {
-            Reaccion reaccionInversa = reaccionDAO.buscarReaccion(receptor, emisor, TipoReaccion.LIKE);
+        Reaccion reaccionExistente = reaccionDAO.buscarPorEmisorReceptor(emisor, receptor);
 
-            if (reaccionInversa != null) {
+        if (reaccionExistente == null) {
+            Reaccion nuevaReaccion = new Reaccion(tipo, LocalDate.now(), emisor, receptor);
+            return reaccionDAO.guardar(nuevaReaccion);
+        }
+
+        reaccionExistente.setTipo(tipo);
+        reaccionExistente.setFecha(LocalDate.now());
+        return reaccionDAO.actualizar(reaccionExistente);
+    }
+
+    private void verificarYCrearMatchSiAplica(IReaccionDAO reaccionDAO, IMatchDAO matchDAO,
+            Estudiante emisor, Estudiante receptor) {
+
+        Reaccion reaccionInversa = reaccionDAO.buscarPorEmisorReceptor(receptor, emisor);
+
+        if (reaccionInversa != null && reaccionInversa.getTipo() == TipoReaccion.LIKE) {
+            Match matchExistente = matchDAO.buscarMatchEntre(emisor, receptor);
+
+            if (matchExistente == null) {
                 Estudiante estudiante1 = emisor;
                 Estudiante estudiante2 = receptor;
 
@@ -53,17 +107,9 @@ public class ReaccionService implements IReaccionService {
                     estudiante2 = emisor;
                 }
 
-                Match existente = matchDAO.buscarMatchEntre(estudiante1, estudiante2);
-
-                if (existente == null) {
-                    Match match = new Match(LocalDate.now(), estudiante1, estudiante2);
-                    matchDAO.guardar(match);
-                }
+                Match nuevoMatch = new Match(LocalDate.now(), estudiante1, estudiante2);
+                matchDAO.guardar(nuevoMatch);
             }
         }
-
-        return reaccion;
-
     }
-
 }

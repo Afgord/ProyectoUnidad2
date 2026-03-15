@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -22,7 +23,10 @@ import java.time.LocalDate;
  * @author Afgord
  */
 @Entity
-@Table(name = "reaccion")
+@Table(name = "reaccion",
+        uniqueConstraints = {
+            @UniqueConstraint(columnNames = {"id_emisor", "id_receptor"})
+        })
 public class Reaccion implements Serializable {
 
     private static final long serialVersionUID = 1L;
