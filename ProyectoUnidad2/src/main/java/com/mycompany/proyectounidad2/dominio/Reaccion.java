@@ -33,7 +33,7 @@ public class Reaccion implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false)
-    private TipoReaccion reaccion;
+    private TipoReaccion tipo;
 
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
@@ -49,8 +49,8 @@ public class Reaccion implements Serializable {
     public Reaccion() {
     }
 
-    public Reaccion(TipoReaccion reaccion, LocalDate fecha, Estudiante emisor, Estudiante receptor) {
-        this.reaccion = reaccion;
+    public Reaccion(TipoReaccion tipo, LocalDate fecha, Estudiante emisor, Estudiante receptor) {
+        this.tipo = tipo;
         this.fecha = fecha;
         this.emisor = emisor;
         this.receptor = receptor;
@@ -64,12 +64,12 @@ public class Reaccion implements Serializable {
         this.id = id;
     }
 
-    public TipoReaccion getReaccion() {
-        return reaccion;
+    public TipoReaccion getTipo() {
+        return tipo;
     }
 
-    public void setReaccion(TipoReaccion reaccion) {
-        this.reaccion = reaccion;
+    public void setTipo(TipoReaccion tipo) {
+        this.tipo = tipo;
     }
 
     public LocalDate getFecha() {
@@ -118,7 +118,7 @@ public class Reaccion implements Serializable {
 
     @Override
     public String toString() {
-        return "Reaccion{" + "id=" + id + ", reaccion=" + reaccion + ", fecha=" + fecha + '}';
+        return "Reaccion{" + "id=" + id + ", tipo=" + tipo + ", fecha=" + fecha + '}';
     }
 
 }

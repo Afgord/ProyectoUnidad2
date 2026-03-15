@@ -4,10 +4,11 @@
 package com.mycompany.proyectounidad2;
 
 import com.mycompany.proyectounidad2.dominio.Estudiante;
-import com.mycompany.proyectounidad2.dominio.Match;
+import com.mycompany.proyectounidad2.dominio.TipoReaccion;
+import com.mycompany.proyectounidad2.servicios.IReaccionService;
+import com.mycompany.proyectounidad2.servicios.ReaccionService;
 import com.mycompany.proyectounidad2.utils.JpaUtil;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDate;
 
 /**
  *
@@ -37,34 +38,32 @@ public class ProyectoUnidad2 {
                     "Ana",
                     "Garcia",
                     "Torres",
-                    "ana2@potros.itson.edu.mx",
+                    "ana3@potros.itson.edu.mx",
                     "abcdef",
                     "Ingenieria en Software",
-                    "fotos/ana2.jpg",
+                    "fotos/ana3.jpg",
                     "Le gusta el ajedrez"
             );
 
             em.getTransaction().begin();
-
             em.persist(estudiante1);
             em.persist(estudiante2);
-
-            Match match = new Match(LocalDate.now(), estudiante1, estudiante2);
-            em.persist(match);
-
             em.getTransaction().commit();
 
-            System.out.println("Match guardado correctamente con id: " + match.getId());
+            IReaccionService reaccionService = new ReaccionService();
+
+            reaccionService.registrarReaccion(estudiante1, estudiante2, TipoReaccion.LIKE);
+            reaccionService.registrarReaccion(estudiante2, estudiante1, TipoReaccion.LIKE);
+
+            System.out.println("Prueba de matching completada correctamente.");
 
         } catch (Exception e) {
-            if (em != null && em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
             e.printStackTrace();
         } finally {
             if (em != null && em.isOpen()) {
                 em.close();
             }
+            JpaUtil.close();
         }
 
     }
