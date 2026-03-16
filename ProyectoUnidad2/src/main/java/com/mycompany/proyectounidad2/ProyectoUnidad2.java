@@ -5,12 +5,15 @@ package com.mycompany.proyectounidad2;
 
 import com.mycompany.proyectounidad2.dominio.Estudiante;
 import com.mycompany.proyectounidad2.dominio.Hobby;
+import com.mycompany.proyectounidad2.dominio.Match;
 import com.mycompany.proyectounidad2.dominio.TipoReaccion;
 import com.mycompany.proyectounidad2.servicios.EstudianteService;
 import com.mycompany.proyectounidad2.servicios.HobbyService;
 import com.mycompany.proyectounidad2.servicios.IEstudianteService;
 import com.mycompany.proyectounidad2.servicios.IHobbyService;
+import com.mycompany.proyectounidad2.servicios.IMatchService;
 import com.mycompany.proyectounidad2.servicios.IReaccionService;
+import com.mycompany.proyectounidad2.servicios.MatchService;
 import com.mycompany.proyectounidad2.servicios.ReaccionService;
 import com.mycompany.proyectounidad2.utils.JpaUtil;
 import java.util.List;
@@ -329,6 +332,108 @@ public class ProyectoUnidad2 {
 
             System.out.println("Perfiles disponibles para " + estudiante1.getNombre() + ":");
             for (Estudiante e : perfiles) {
+                System.out.println("- " + e.getNombre() + " " + e.getApPat());
+            }
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 20: VER LISTA DE MATCHES");
+            System.out.println("=================================================");
+
+            IMatchService matchService = new MatchService();
+            List<Match> matches = matchService.obtenerMatchesDeEstudiante(estudiante1.getId());
+
+            System.out.println("Matches de " + estudiante1.getNombre() + ":");
+
+            for (Match m : matches) {
+                Estudiante otro;
+
+                if (m.getEstudiante1().getId().equals(estudiante1.getId())) {
+                    otro = m.getEstudiante2();
+                } else {
+                    otro = m.getEstudiante1();
+                }
+
+                System.out.println("- " + otro.getNombre() + " " + otro.getApPat());
+            }
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 21: ACTUALIZAR PERFIL");
+            System.out.println("=================================================");
+
+            estudianteService.actualizarPerfil(
+                    estudiante1.getId(),
+                    "Ingenieria en Software Actualizada",
+                    "Le gusta programar, jugar y estudiar en equipo.",
+                    "fotos/luis_actualizada.jpg"
+            );
+
+            Estudiante estudianteActualizado = estudianteService.buscarPorId(estudiante1.getId());
+            System.out.println("Carrera actualizada: " + estudianteActualizado.getCarrera());
+            System.out.println("Descripcion actualizada: " + estudianteActualizado.getDescripcion());
+            System.out.println("Foto actualizada: " + estudianteActualizado.getFotoPerfil());
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 22: QUITAR HOBBY");
+            System.out.println("=================================================");
+
+            estudianteService.quitarHobby(estudiante1.getId(), hobby1.getId());
+
+            Estudiante estudianteSinHobby = estudianteService.buscarPorIdConHobbies(estudiante1.getId());
+            System.out.println("Hobbies de " + estudianteSinHobby.getNombre() + " despues de quitar uno:");
+
+            for (Hobby h : estudianteSinHobby.getHobbies()) {
+                System.out.println("- " + h.getNombre());
+            }
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 23: QUITAR HOBBY NO ASIGNADO");
+            System.out.println("=================================================");
+
+            try {
+                estudianteService.quitarHobby(estudiante1.getId(), hobby1.getId());
+            } catch (IllegalArgumentException e) {
+                System.out.println("Validación correcta: " + e.getMessage());
+            }
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 24: DESACTIVAR CUENTA");
+            System.out.println("=================================================");
+
+            estudianteService.desactivarCuenta(estudiante2.getId());
+            System.out.println("Cuenta desactivada correctamente.");
+
+            Estudiante estudianteDesactivado = estudianteService.buscarPorId(estudiante2.getId());
+            System.out.println("Estado activo de " + estudianteDesactivado.getNombre() + ": " + estudianteDesactivado.isActivo());
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 25: LOGIN DE CUENTA DESACTIVADA");
+            System.out.println("=================================================");
+
+            try {
+                estudianteService.iniciarSesion("ana3@potros.itson.edu.mx", "Ana123");
+            } catch (IllegalArgumentException e) {
+                System.out.println("Validación correcta: " + e.getMessage());
+            }
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 26: COMPATIBLES SIN CUENTAS DESACTIVADAS");
+            System.out.println("=================================================");
+
+            List<Estudiante> compatiblesActivos = estudianteService.buscarConHobbiesEnComun(estudiante1.getId());
+
+            System.out.println("Compatibles activos con " + estudiante1.getNombre() + ":");
+            for (Estudiante e : compatiblesActivos) {
+                System.out.println("- " + e.getNombre() + " " + e.getApPat());
+            }
+
+            System.out.println("\n=================================================");
+            System.out.println("PRUEBA 27: EXPLORAR PERFILES SIN CUENTAS DESACTIVADAS");
+            System.out.println("=================================================");
+
+            List<Estudiante> perfilesActivos = estudianteService.explorarPerfiles(estudiante1.getId());
+
+            System.out.println("Perfiles activos disponibles para " + estudiante1.getNombre() + ":");
+            for (Estudiante e : perfilesActivos) {
                 System.out.println("- " + e.getNombre() + " " + e.getApPat());
             }
 

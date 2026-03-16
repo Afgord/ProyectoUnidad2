@@ -49,6 +49,8 @@ public class MatchDAO implements IMatchDAO {
         String jpql = """
         SELECT m
         FROM Match m
+        JOIN FETCH m.estudiante1
+        JOIN FETCH m.estudiante2
         WHERE m.estudiante1.id = :id
            OR m.estudiante2.id = :id
     """;

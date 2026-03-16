@@ -69,13 +69,14 @@ public class EstudianteDAO implements IEstudianteDAO {
     @Override
     public List<Estudiante> buscarConHobbiesEnComun(Long idEstudiante) {
         String jpql = """
-        SELECT DISTINCT e2
-        FROM Estudiante e1
-        JOIN e1.hobbies h
-        JOIN h.estudiantes e2
-        WHERE e1.id = :idEstudiante
-          AND e2.id <> :idEstudiante
-        """;
+    SELECT DISTINCT e2
+    FROM Estudiante e1
+    JOIN e1.hobbies h
+    JOIN h.estudiantes e2
+    WHERE e1.id = :idEstudiante
+      AND e2.id <> :idEstudiante
+      AND e2.activo = true
+    """;
 
         TypedQuery<Estudiante> query = em.createQuery(jpql, Estudiante.class);
         query.setParameter("idEstudiante", idEstudiante);
@@ -86,15 +87,16 @@ public class EstudianteDAO implements IEstudianteDAO {
     @Override
     public List<Estudiante> explorarPerfiles(Long idEstudiante) {
         String jpql = """
-        SELECT e
-        FROM Estudiante e
-        WHERE e.id <> :idEstudiante
-          AND e.id NOT IN (
-              SELECT r.receptor.id
-              FROM Reaccion r
-              WHERE r.emisor.id = :idEstudiante
-          )
-        """;
+    SELECT e
+    FROM Estudiante e
+    WHERE e.id <> :idEstudiante
+      AND e.activo = true
+      AND e.id NOT IN (
+          SELECT r.receptor.id
+          FROM Reaccion r
+          WHERE r.emisor.id = :idEstudiante
+      )
+    """;
 
         TypedQuery<Estudiante> query = em.createQuery(jpql, Estudiante.class);
         query.setParameter("idEstudiante", idEstudiante);

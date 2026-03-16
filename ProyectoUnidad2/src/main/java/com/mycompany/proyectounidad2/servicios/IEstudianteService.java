@@ -21,6 +21,8 @@ public interface IEstudianteService {
 
     Estudiante agregarHobby(Long idEstudiante, Long idHobby);
 
+    Estudiante actualizarPerfil(Long idEstudiante, String carrera, String descripcion, String fotoPerfil);
+
     Estudiante buscarPorId(Long id);
 
     Estudiante buscarPorIdConHobbies(Long id);
@@ -28,5 +30,9 @@ public interface IEstudianteService {
     List<Estudiante> buscarConHobbiesEnComun(Long idEstudiante);
 
     List<Estudiante> explorarPerfiles(Long idEstudiante);
+
+    void desactivarCuenta(Long idEstudiante);
+
+    Estudiante quitarHobby(Long idEstudiante, Long idHobby);
 
 }

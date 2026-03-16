@@ -47,6 +47,8 @@ public class Estudiante implements Serializable {
     private String fotoPerfil;
     @Column(name = "descripcion", length = 500)
     private String descripcion;
+    @Column(name = "activo", nullable = false)
+    private boolean activo = true;
 
     @ManyToMany
     @JoinTable(
@@ -143,6 +145,14 @@ public class Estudiante implements Serializable {
         this.descripcion = descripcion;
     }
 
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
     public Set<Hobby> getHobbies() {
         return hobbies;
     }
@@ -173,9 +183,8 @@ public class Estudiante implements Serializable {
 
     @Override
     public String toString() {
-        return "Estudiante{" + "id=" + id + ", nombre=" + nombre + ", apPat=" + apPat
-                + ", apMat=" + apMat + ", correoInst=" + correoInst + ", carrera=" + carrera
-                + ", fotoPerfil=" + fotoPerfil + ", descripcion=" + descripcion + '}';
+        return "Estudiante{" + "id=" + id + ", nombre=" + nombre + ", apPat=" + apPat + ", apMat=" + apMat + ", correoInst="
+                + correoInst + ", carrera=" + carrera + ", fotoPerfil=" + fotoPerfil + ", descripcion=" + descripcion + ", activo=" + activo + '}';
     }
 
 }

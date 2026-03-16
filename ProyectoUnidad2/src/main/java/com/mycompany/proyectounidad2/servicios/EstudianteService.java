@@ -154,6 +154,10 @@ public class EstudianteService implements IEstudianteService {
                 throw new IllegalArgumentException("No existe un estudiante con ese correo institucional.");
             }
 
+            if (!estudiante.isActivo()) {
+                throw new IllegalArgumentException("La cuenta del estudiante está desactivada.");
+            }
+
             boolean passwordCorrecto = PasswordUtil.verificarPassword(password, estudiante.getPassword());
 
             if (!passwordCorrecto) {
@@ -303,6 +307,156 @@ public class EstudianteService implements IEstudianteService {
 
             return estudianteDAO.explorarPerfiles(idEstudiante);
 
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public Estudiante quitarHobby(Long idEstudiante, Long idHobby) {
+        if (idEstudiante == null) {
+            throw new IllegalArgumentException("El id del estudiante no puede ser nulo.");
+        }
+
+        if (idHobby == null) {
+            throw new IllegalArgumentException("El id del hobby no puede ser nulo.");
+        }
+
+        EntityManager em = JpaUtil.getEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            IEstudianteDAO estudianteDAO = new EstudianteDAO(em);
+            IHobbyDAO hobbyDAO = new HobbyDAO(em);
+
+            Estudiante estudiante = estudianteDAO.buscarPorIdConHobbies(idEstudiante);
+            if (estudiante == null) {
+                throw new IllegalArgumentException("No existe un estudiante con ese id.");
+            }
+
+            Hobby hobby = hobbyDAO.buscarPorId(idHobby);
+            if (hobby == null) {
+                throw new IllegalArgumentException("No existe un hobby con ese id.");
+            }
+
+            if (!estudiante.getHobbies().contains(hobby)) {
+                throw new IllegalArgumentException("El estudiante no tiene asignado ese hobby.");
+            }
+
+            estudiante.getHobbies().remove(hobby);
+
+            Estudiante actualizado = estudianteDAO.actualizar(estudiante);
+
+            em.getTransaction().commit();
+            return actualizado;
+
+        } catch (IllegalArgumentException e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error al quitar hobby del estudiante.", e);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public Estudiante actualizarPerfil(Long idEstudiante, String carrera, String descripcion, String fotoPerfil) {
+        if (idEstudiante == null) {
+            throw new IllegalArgumentException("El id del estudiante no puede ser nulo.");
+        }
+
+        EntityManager em = JpaUtil.getEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            IEstudianteDAO estudianteDAO = new EstudianteDAO(em);
+
+            Estudiante estudiante = estudianteDAO.buscarPorId(idEstudiante);
+            if (estudiante == null) {
+                throw new IllegalArgumentException("No existe un estudiante con ese id.");
+            }
+
+            if (carrera != null && !carrera.isBlank()) {
+                estudiante.setCarrera(carrera.trim());
+            }
+
+            if (descripcion != null) {
+                descripcion = descripcion.trim();
+                if (descripcion.length() > 500) {
+                    throw new IllegalArgumentException("La descripción no puede exceder 500 caracteres.");
+                }
+                estudiante.setDescripcion(descripcion);
+            }
+
+            if (fotoPerfil != null) {
+                estudiante.setFotoPerfil(fotoPerfil.trim());
+            }
+
+            Estudiante actualizado = estudianteDAO.actualizar(estudiante);
+
+            em.getTransaction().commit();
+            return actualizado;
+
+        } catch (IllegalArgumentException e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error al actualizar el perfil del estudiante.", e);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public void desactivarCuenta(Long idEstudiante) {
+        if (idEstudiante == null) {
+            throw new IllegalArgumentException("El id del estudiante no puede ser nulo.");
+        }
+
+        EntityManager em = JpaUtil.getEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            IEstudianteDAO estudianteDAO = new EstudianteDAO(em);
+
+            Estudiante estudiante = estudianteDAO.buscarPorId(idEstudiante);
+            if (estudiante == null) {
+                throw new IllegalArgumentException("No existe un estudiante con ese id.");
+            }
+
+            if (!estudiante.isActivo()) {
+                throw new IllegalArgumentException("La cuenta del estudiante ya está desactivada.");
+            }
+
+            estudiante.setActivo(false);
+            estudianteDAO.actualizar(estudiante);
+
+            em.getTransaction().commit();
+
+        } catch (IllegalArgumentException e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error al desactivar la cuenta del estudiante.", e);
         } finally {
             em.close();
         }
